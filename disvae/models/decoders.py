@@ -5,8 +5,9 @@ import numpy as np
 
 import torch
 from torch import nn
+import torch.nn.functional as F
 
-from utils.resblocks import DeconvResBlock
+from disvae.utils.resblocks import DeconvResBlock
 
 # ALL decoders should be called Decoder<Model>
 def get_decoder(model_type):
@@ -107,7 +108,10 @@ class DecoderCustomres(nn.Module):
         )
 
     def forward(self, z: torch.Tensor):
-        h1 = self.fc3(self.fc2(self.fc1(z))).reshape(z.shape[0], 1024, 1, 1)
+        x = F.leaky_relu(self.fc1(z))
+        x = F.leaky_relu(self.fc2(x))
+        x = F.leaky_relu(self.fc3(x))
+        h1 = x.reshape(z.size(0), 1024, 1, 1)
         output = self.deconv_layers(h1)
 
         return output
