@@ -5,6 +5,7 @@ import numpy as np
 
 import torch
 from torch import nn
+from utils.resblocks import ConvResBlock
 
 
 # ALL encoders should be called Enccoder<Model>
@@ -86,4 +87,33 @@ class EncoderBurgess(nn.Module):
         mu_logvar = self.mu_logvar_gen(x)
         mu, logvar = mu_logvar.view(-1, self.latent_dim, 2).unbind(-1)
 
+        return mu, logvar
+
+class EncoderCustomres(nn.Module):
+    def __init__(self, img_size, latent_dim=10):
+        super(EncoderCustomres, self).__init__()
+
+        self.input_dim = img_size
+        self.latent_dim = latent_dim
+        self.n_channels = 1
+
+        self.conv_layers = nn.Sequential(
+            ConvResBlock(1, 32),
+            ConvResBlock(32, 64),
+            ConvResBlock(64, 128),
+            ConvResBlock(128, 256),
+            ConvResBlock(256, 512),
+            ConvResBlock(512, 512),
+            ConvResBlock(512, 512),
+            ConvResBlock(512, 1024)
+        )
+        self.lin1 = nn.Linear(1024, 512)
+        self.lin2 = nn.Linear(512, 256)
+        self.embedding = nn.Linear(256, self.latent_dim)
+        self.log_var = nn.Linear(256, self.latent_dim)
+
+    def forward(self, x: torch.Tensor):
+        h1 = self.conv_layers(x).reshape(x.shape[0], -1)
+        mu = self.embedding(self.lin2(self.lin1(h1)))
+        logvar = self.log_var(self.lin2(self.lin1(h1)))
         return mu, logvar

@@ -9,7 +9,7 @@ from disvae.utils.initialization import weights_init
 from .encoders import get_encoder
 from .decoders import get_decoder
 
-MODELS = ["Burgess"]
+MODELS = ["Burgess", "Customres"]
 
 
 def init_specific_model(model_type, img_size, latent_dim):

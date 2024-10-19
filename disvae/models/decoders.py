@@ -6,6 +6,7 @@ import numpy as np
 import torch
 from torch import nn
 
+from utils.resblocks import DeconvResBlock
 
 # ALL decoders should be called Decoder<Model>
 def get_decoder(model_type):
@@ -82,3 +83,31 @@ class DecoderBurgess(nn.Module):
         x = torch.sigmoid(self.convT3(x))
 
         return x
+
+class DecoderCustomres(nn.Module):
+    def __init__(self, img_size, latent_dim=10):
+        super(DecoderCustomres, self).__init__()
+        
+        self.input_dim = img_size
+        self.latent_dim = latent_dim
+        self.n_channels = 1
+
+        self.fc1 = nn.Linear(self.latent_dim, 256)
+        self.fc2 = nn.Linear(256, 512)
+        self.fc3 = nn.Linear(512, 1024)
+        self.deconv_layers = nn.Sequential(
+            DeconvResBlock(1024, 512),
+            DeconvResBlock(512, 512),
+            DeconvResBlock(512, 512),
+            DeconvResBlock(512, 256),
+            DeconvResBlock(256, 128),
+            DeconvResBlock(128, 64),
+            DeconvResBlock(64, 32),
+            DeconvResBlock(32, 1, is_last=True),
+        )
+
+    def forward(self, z: torch.Tensor):
+        h1 = self.fc3(self.fc2(self.fc1(z))).reshape(z.shape[0], 1024, 1, 1)
+        output = self.deconv_layers(h1)
+
+        return output
