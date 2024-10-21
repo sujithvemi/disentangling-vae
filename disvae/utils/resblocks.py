@@ -7,14 +7,14 @@ class ConvResBlock(nn.Module):
         self.conv1 = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 3, 2, padding=1),
             nn.BatchNorm2d(out_channels),
-            # nn.PReLU(device="cuda")
-            nn.LeakyReLU()
+            nn.PReLU(device="cuda")
+            # nn.LeakyReLU()
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, 3, 1, padding=1),
             nn.BatchNorm2d(out_channels),
-            # nn.PReLU(device="cuda")
-            nn.LeakyReLU()
+            nn.PReLU(device="cuda")
+            # nn.LeakyReLU()
         )
         self.ds = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 1, 2, padding=0),
@@ -24,7 +24,8 @@ class ConvResBlock(nn.Module):
         skip_op = self.ds(x)
         conv1_op = self.conv1(x)
         conv2_op = self.conv2(conv1_op)
-        return nn.LeakyReLU()(conv2_op + skip_op)
+        return nn.PReLU(device="cuda")(conv2_op + skip_op)
+        # return nn.LeakyReLU()(conv2_op + skip_op)
     
 class DeconvResBlock(nn.Module):
     def __init__(self, in_channels, out_channels, is_last=False):
@@ -33,14 +34,14 @@ class DeconvResBlock(nn.Module):
         self.conv1 = nn.Sequential(
             nn.ConvTranspose2d(in_channels, out_channels, 3, 2, padding=1, output_padding=1),
             nn.BatchNorm2d(out_channels),
-            # nn.PReLU(device="cuda")
-            nn.LeakyReLU()
+            nn.PReLU(device="cuda")
+            # nn.LeakyReLU()
         )
         self.conv2 = nn.Sequential(
             nn.ConvTranspose2d(out_channels, out_channels, 3, 1, padding=1),
             nn.BatchNorm2d(out_channels),
-            # nn.PReLU(device="cuda")
-            nn.LeakyReLU()
+            nn.PReLU(device="cuda")
+            # nn.LeakyReLU()
         )
         self.us = nn.Sequential(
             nn.ConvTranspose2d(in_channels, out_channels, 1, 2, padding=0, output_padding=1),
@@ -52,6 +53,7 @@ class DeconvResBlock(nn.Module):
         conv2_op = self.conv2(conv1_op)
         # return nn.LeakyReLU()(conv2_op + skip_op)
         if not self.is_last:
-            return nn.LeakyReLU()(conv2_op + skip_op)
+            return nn.PReLU(device="cuda")(conv2_op + skip_op)
+            # return nn.LeakyReLU()(conv2_op + skip_op)
         else:
             return nn.Sigmoid()(conv2_op + skip_op)
