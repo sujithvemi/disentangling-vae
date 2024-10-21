@@ -96,6 +96,9 @@ class DecoderCustomres(nn.Module):
         self.fc1 = nn.Linear(self.latent_dim, 256)
         self.fc2 = nn.Linear(256, 512)
         self.fc3 = nn.Linear(512, 1024)
+        self.fc1_act = nn.PReLU(device="cuda")
+        self.fc2_act = nn.PReLU(device="cuda")
+        self.fc3_act = nn.PReLU(device="cuda")
         self.deconv_layers = nn.Sequential(
             DeconvResBlock(1024, 512),
             DeconvResBlock(512, 512),
@@ -108,9 +111,12 @@ class DecoderCustomres(nn.Module):
         )
 
     def forward(self, z: torch.Tensor):
-        x = F.leaky_relu(self.fc1(z))
-        x = F.leaky_relu(self.fc2(x))
-        x = F.leaky_relu(self.fc3(x))
+        x = self.fc1(z)
+        x = self.fc1_act(x)
+        x = self.fc2(x)
+        x = self.fc2_act(x)
+        x = self.fc3(x)
+        x = self.fc3_act(x)
         h1 = x.reshape(z.size(0), 1024, 1, 1)
         output = self.deconv_layers(h1)
 
