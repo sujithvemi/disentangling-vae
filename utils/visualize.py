@@ -259,12 +259,19 @@ class Visualizer():
         latent_samples = [self._traverse_line(dim, n_per_latent, data=data)
                           for dim in range(self.latent_dim)]
         decoded_traversal = self._decode_latents(torch.cat(latent_samples, dim=0))
+        print(torch.unique(decoded_traversal))
 
         if is_reorder_latents:
             n_images, *other_shape = decoded_traversal.size()
+            print(decoded_traversal.size())
             n_rows = n_images // n_per_latent
             decoded_traversal = decoded_traversal.reshape(n_rows, n_per_latent, *other_shape)
+            print(decoded_traversal.size())
             decoded_traversal = sort_list_by_other(decoded_traversal, self.losses)
+            print("losses", self.losses)
+            print(len(decoded_traversal))
+            for elem in decoded_traversal:
+                print(type(elem), elem.size())
             decoded_traversal = torch.stack(decoded_traversal, dim=0)
             decoded_traversal = decoded_traversal.reshape(n_images, *other_shape)
 

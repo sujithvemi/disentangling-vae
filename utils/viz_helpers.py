@@ -58,11 +58,13 @@ def read_loss_from_file(log_file_path, loss_to_fetch):
     LOSS = "Loss"
 
     logs = pd.read_csv(log_file_path)
-    df_last_epoch_loss = logs[logs.loc[:, EPOCH] == logs.loc[:, EPOCH].max()]
+    print(logs)
+    # df_last_epoch_loss = logs[logs.loc[:, EPOCH] == logs.loc[:, EPOCH].max()]
+    df_last_epoch_loss = logs[logs.loc[:, EPOCH] == "199"]
     df_last_epoch_loss = df_last_epoch_loss.loc[df_last_epoch_loss.loc[:, LOSS].str.startswith(loss_to_fetch), :]
     df_last_epoch_loss.loc[:, LOSS] = df_last_epoch_loss.loc[:, LOSS].str.replace(loss_to_fetch, "").astype(int)
     df_last_epoch_loss = df_last_epoch_loss.sort_values(LOSS).loc[:, "Value"]
-    return list(df_last_epoch_loss)
+    return [float(x) for x in list(df_last_epoch_loss)]
 
 
 def add_labels(input_image, labels):
