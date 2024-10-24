@@ -231,7 +231,7 @@ class Evaluator:
         return samples_zCx, params_zCX
 
     def _estimate_latent_entropies(self, samples_zCx, params_zCX,
-                                   n_samples=10000):
+                                   n_samples=5000):
         r"""Estimate :math:`H(z_j) = E_{q(z_j)} [-log q(z_j)] = E_{p(x)} E_{q(z_j|x)} [-log q(z_j)]`
         using the emperical distribution of :math:`p(x)`.
 
@@ -260,6 +260,8 @@ class Evaluator:
             Tensor of shape (latent_dim) containing the marginal entropies H(z_j)
         """
         len_dataset, latent_dim = samples_zCx.shape
+        print("len_dataset", len_dataset)
+        print("latent_dim", latent_dim)
         device = samples_zCx.device
         H_z = torch.zeros(latent_dim, device=device)
 
